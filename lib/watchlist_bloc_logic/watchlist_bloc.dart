@@ -13,7 +13,7 @@ class WatchlistFetchBloc extends Bloc<WatchlistEvent,WatchlistState>{
       if(event is FetchWatchlistData){
         watchlistFetchData = await watchlistResponse.fetchWatchlistData();
         if(watchlistFetchData.isEmpty){
-          emit(WatchlistFetchError(errormessage: AppConstants.noData));
+          emit(WatchlistFetchError(errorMessage: AppConstants.noData));
         }else{
           emit(WatchlistFetchData(watchlistFetchData: watchlistFetchData));
         }

@@ -9,7 +9,7 @@ class WatchlistFetchData extends WatchlistState{
 });
 }
 class WatchlistFetchError extends WatchlistState{
-  final String errormessage;
-  WatchlistFetchError({required this.errormessage});
+  final String errorMessage;
+  WatchlistFetchError({required this.errorMessage});
 
 }

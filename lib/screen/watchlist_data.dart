@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:task7476_watchlist_bloc/screen/navigation_screen.dart';
+import 'package:task7476_watchlist_bloc/screen/watchlist_tabview.dart';
+import '../api_details/watchlistrseponsemodel.dart';
 import '../constants/constants.dart';
 import '../watchlist_bloc_logic/watchlist_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../watchlist_bloc_logic/watchlist_event.dart';
 import '../watchlist_bloc_logic/watchlist_state.dart';
+
+
+class WatchlistDataUIStateless extends StatelessWidget {
+  const WatchlistDataUIStateless({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(home:WatchlistDataUI());
+  }
+}
 
 class WatchlistDataUI extends StatefulWidget {
   const WatchlistDataUI({Key? key}) : super(key: key);
@@ -13,7 +24,7 @@ class WatchlistDataUI extends StatefulWidget {
   State<WatchlistDataUI> createState() => _WatchlistDataUIState();
 }
 
-class _WatchlistDataUIState extends State<WatchlistDataUI> {
+class _WatchlistDataUIState extends State<WatchlistDataUI> with SingleTickerProviderStateMixin{
   WatchlistFetchBloc watchlistFetchBloc = WatchlistFetchBloc();
 
   @override
@@ -26,64 +37,50 @@ class _WatchlistDataUIState extends State<WatchlistDataUI> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => watchlistFetchBloc,
-      child: BlocBuilder<WatchlistFetchBloc, WatchlistState>(
-        builder: (context, state) {
-          if (state is WatchlistInitial) {
-            return Center(
-              child: Image.asset(AppConstants.imageUrl),);
-          } else if (state is WatchlistFetchData) {
-            return ListView.builder(
-                itemCount: state.watchlistFetchData.length,
-                itemBuilder: (BuildContext cxt, int index) {
-                  return Container(
-                    width: 300,
-                    height: 140,
-                    padding: const EdgeInsets.all(5),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      color: Colors.white,
-                      elevation: 10,
-                      child: ListTile(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => WatchlistNavigation(data:state.watchlistFetchData[index].name.toString())),
-                    );},
-                          title: showData(state.watchlistFetchData[index].name.toUpperCase(),16,FontWeight.bold,Colors.green),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                            child: showData(state.watchlistFetchData[index].contacts,13,FontWeight.bold,Colors.grey),
-                          ),
-                          trailing: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                            child: CircleAvatar(
-                              radius: 25,
-                              backgroundImage: NetworkImage(state.watchlistFetchData[index].url),
-                              backgroundColor: Colors.greenAccent,
-                            ),
-                          )),
-
-                    ),
-                  );
-                });
-          }else if(state is WatchlistFetchError){
-            return noData(state.errormessage);
-          }
-          else {
-           return noData(AppConstants.errorOccur);
-          }
-        },
-      ),
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(backgroundColor: Colors.green,
+          appBar: AppBar(backgroundColor: Colors.greenAccent,
+            leading: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+            title: Text(AppConstants.watchList),
+            bottom: TabBar(
+              labelColor: Colors.blue,
+              unselectedLabelColor: Colors.black,
+              tabs: [
+                watchlistTabs(AppConstants.contactOneTab),
+                watchlistTabs(AppConstants.contactTwoTab),
+                watchlistTabs(AppConstants.contactThreeTab),
+              ],
+            ),
+          ),
+          body:BlocBuilder<WatchlistFetchBloc, WatchlistState>(
+            builder: (context, state) {
+              if (state is WatchlistInitial) {
+                return Center(
+                  child: Image.asset(AppConstants.imageUrl),);
+              } else if (state is WatchlistFetchData) {
+                List<WatchlistData> userList = state.watchlistFetchData;
+                return TabBarView(
+                  children: <Widget>[
+                    WatchlistTabview(data: userList.sublist(0, 40)),
+                    WatchlistTabview(data: userList.sublist(40, 80)),
+                    WatchlistTabview(data: userList.sublist(80, 100
+                    )),
+                  ],
+                );
+              }else if(state is WatchlistFetchError){
+                return noData(state.errorMessage);
+              }
+              else {
+                return noData(AppConstants.errorOccur);
+              }
+            },
+          ),),),
     );
-  }
 
-  showData(String textData, double size,FontWeight weight,Color col) {
-    return Text(
-      textData,
-      style: TextStyle(fontSize: size, fontWeight: weight,color: col),
-    );
   }
 
   noData(String dataText){
